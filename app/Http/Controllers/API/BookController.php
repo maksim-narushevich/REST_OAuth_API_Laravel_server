@@ -85,19 +85,23 @@ class BookController extends BaseController
         $input = $request->all();
 
 
-        $validator = Validator::make($input, [
-            'title' => 'required',
-            'detail' => 'required'
-        ]);
+//        $validator = Validator::make($input, [
+//            'title' => 'required',
+//            'detail' => 'required'
+//        ]);
 
 
-        if($validator->fails()){
-            return $this->sendError('Validation Error.', $validator->errors());
+//        if($validator->fails()){
+//            return $this->sendError('Validation Error.', $validator->errors());
+//        }
+
+
+        if(!empty($input['title'])){
+            $book->title = $input['title'];
         }
-
-
-        $book->title = $input['title'];
-        $book->detail = $input['detail'];
+        if(!empty($input['detail'])) {
+            $book->detail = $input['detail'];
+        }
         $book->save();
 
 
