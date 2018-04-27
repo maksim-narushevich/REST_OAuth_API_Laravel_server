@@ -102,6 +102,24 @@ class BookController extends BaseController
         if(!empty($input['detail'])) {
             $book->detail = $input['detail'];
         }
+
+        if(!empty($input['date'])) {
+            $book->date = $input['date'];
+        }
+
+        if(!empty($input['author'])) {
+            $book->author = $input['author'];
+        }
+        if(!empty($input['publish_year'])) {
+            $book->publish_year = $input['publish_year'];
+        }
+        if(!empty($input['category_id'])) {
+            $book->category_id = $input['category_id'];
+        }
+        if(!empty($input['user_id'])) {
+            $book->user_id = $input['user_id'];
+        }
+
         $book->save();
 
 

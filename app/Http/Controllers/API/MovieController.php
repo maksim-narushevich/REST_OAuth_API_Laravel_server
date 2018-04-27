@@ -87,19 +87,40 @@ class MovieController extends BaseController
         $input = $request->all();
 
 
-        $validator = Validator::make($input, [
-            'title' => 'required',
-            'detail' => 'required'
-        ]);
+//        $validator = Validator::make($input, [
+//            'title' => 'required',
+//            'detail' => 'required'
+//        ]);
+//
+//
+//        if($validator->fails()){
+//            return $this->sendError('Validation Error.', $validator->errors());
+//        }
 
 
-        if($validator->fails()){
-            return $this->sendError('Validation Error.', $validator->errors());
+        if(!empty($input['title'])){
+            $movie->title = $input['title'];
+        }
+        if(!empty($input['detail'])) {
+            $movie->detail = $input['detail'];
         }
 
+        if(!empty($input['finished_date'])) {
+            $movie->finished_date = $input['finished_date'];
+        }
 
-        $movie->title = $input['title'];
-        $movie->detail = $input['detail'];
+        if(!empty($input['author'])) {
+            $movie->author = $input['author'];
+        }
+        if(!empty($input['movie_created_year'])) {
+            $movie->movie_created_year = $input['movie_created_year'];
+        }
+        if(!empty($input['category_id'])) {
+            $movie->category_id = $input['category_id'];
+        }
+        if(!empty($input['user_id'])) {
+            $movie->user_id = $input['user_id'];
+        }
         $movie->save();
 
 
