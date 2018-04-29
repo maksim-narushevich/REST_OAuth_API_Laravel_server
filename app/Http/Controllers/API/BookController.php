@@ -6,6 +6,7 @@ namespace App\Http\Controllers\API;
 use App\Book;
 use Illuminate\Http\Request;
 use App\Http\Controllers\API\BaseController as BaseController;
+use Illuminate\Support\Facades\Auth;
 use Validator;
 
 
@@ -27,7 +28,7 @@ class BookController extends BaseController
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
@@ -41,11 +42,11 @@ class BookController extends BaseController
         ]);
 
 
-        if($validator->fails()){
+        if ($validator->fails()) {
             return $this->sendError('Validation Error.', $validator->errors());
         }
 
-
+        $input['user_id'] = Auth::id();
         $book = Book::create($input);
 
 
@@ -56,7 +57,7 @@ class BookController extends BaseController
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param  int $id
      * @return \Illuminate\Http\Response
      */
     public function show($id)
@@ -76,48 +77,42 @@ class BookController extends BaseController
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
+     * @param  \Illuminate\Http\Request $request
+     * @param  int $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Book $book)
+    public function update(Request $request, $id)
     {
         $input = $request->all();
 
+        $book = Book::find($id);
+        if ($book) {
+            if (Auth::id() == $book->user_id) {
+                if (!empty($input['title'])) {
+                    $book->title = $input['title'];
+                }
+                if (!empty($input['detail'])) {
+                    $book->detail = $input['detail'];
+                }
 
-//        $validator = Validator::make($input, [
-//            'title' => 'required',
-//            'detail' => 'required'
-//        ]);
+                if (!empty($input['date'])) {
+                    $book->date = $input['date'];
+                }
 
-
-//        if($validator->fails()){
-//            return $this->sendError('Validation Error.', $validator->errors());
-//        }
-
-
-        if(!empty($input['title'])){
-            $book->title = $input['title'];
-        }
-        if(!empty($input['detail'])) {
-            $book->detail = $input['detail'];
-        }
-
-        if(!empty($input['date'])) {
-            $book->date = $input['date'];
-        }
-
-        if(!empty($input['author'])) {
-            $book->author = $input['author'];
-        }
-        if(!empty($input['publish_year'])) {
-            $book->publish_year = $input['publish_year'];
-        }
-        if(!empty($input['category_id'])) {
-            $book->category_id = $input['category_id'];
-        }
-        if(!empty($input['user_id'])) {
-            $book->user_id = $input['user_id'];
+                if (!empty($input['author'])) {
+                    $book->author = $input['author'];
+                }
+                if (!empty($input['publish_year'])) {
+                    $book->publish_year = $input['publish_year'];
+                }
+                if (!empty($input['category_id'])) {
+                    $book->category_id = $input['category_id'];
+                }
+            } else {
+                return $this->sendError('Unauthorized action.Your ID is ' . Auth::id() . ". Book User_ID is " . $book->user_id);
+            }
+        } else {
+            return $this->sendError("Book with ID " . $id . " is not found.");
         }
 
         $book->save();
@@ -130,13 +125,21 @@ class BookController extends BaseController
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param  int $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Book $book)
+    public function destroy($id)
     {
-        $book->delete();
-
+        $book = Book::find($id);
+        if ($book) {
+            if (Auth::id() == $book->user_id) {
+                $book->delete();
+            } else {
+                return $this->sendError('Unauthorized action.Your ID is ' . Auth::id() . ". Book User_ID is " . $book->user_id);
+            }
+        } else {
+            return $this->sendError("Book with ID " . $id . " is not found.");
+        }
 
         return $this->sendResponse($book->toArray(), 'Book deleted successfully.');
     }

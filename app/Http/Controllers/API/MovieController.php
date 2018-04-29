@@ -7,6 +7,7 @@ use App\Book;
 use Illuminate\Http\Request;
 use App\Http\Controllers\API\BaseController as BaseController;
 use App\Movie;
+use Illuminate\Support\Facades\Auth;
 use Validator;
 
 
@@ -29,7 +30,7 @@ class MovieController extends BaseController
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
@@ -43,11 +44,11 @@ class MovieController extends BaseController
         ]);
 
 
-        if($validator->fails()){
+        if ($validator->fails()) {
             return $this->sendError('Validation Error.', $validator->errors());
         }
 
-
+        $input['user_id'] = Auth::id();
         $movie = Movie::create($input);
 
 
@@ -58,7 +59,7 @@ class MovieController extends BaseController
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param  int $id
      * @return \Illuminate\Http\Response
      */
     public function show($id)
@@ -78,50 +79,45 @@ class MovieController extends BaseController
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
+     * @param  \Illuminate\Http\Request $request
+     * @param  int $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Movie $movie)
+    public function update(Request $request, $id)
     {
         $input = $request->all();
 
+        $movie = Movie::find($id);
 
-//        $validator = Validator::make($input, [
-//            'title' => 'required',
-//            'detail' => 'required'
-//        ]);
-//
-//
-//        if($validator->fails()){
-//            return $this->sendError('Validation Error.', $validator->errors());
-//        }
+        if ($movie) {
+            if (Auth::id() == $movie->user_id) {
+                if (!empty($input['title'])) {
+                    $movie->title = $input['title'];
+                }
+                if (!empty($input['detail'])) {
+                    $movie->detail = $input['detail'];
+                }
 
+                if (!empty($input['finished_date'])) {
+                    $movie->finished_date = $input['finished_date'];
+                }
 
-        if(!empty($input['title'])){
-            $movie->title = $input['title'];
+                if (!empty($input['author'])) {
+                    $movie->author = $input['author'];
+                }
+                if (!empty($input['movie_created_year'])) {
+                    $movie->movie_created_year = $input['movie_created_year'];
+                }
+                if (!empty($input['category_id'])) {
+                    $movie->category_id = $input['category_id'];
+                }
+                $movie->save();
+            } else {
+                return $this->sendError('Unauthorized action.Your ID is ' . Auth::id() . ". Movie User_ID is " . $movie->user_id);
+            }
+        } else {
+            return $this->sendError("Movie with ID " . $id . " is not found.");
         }
-        if(!empty($input['detail'])) {
-            $movie->detail = $input['detail'];
-        }
-
-        if(!empty($input['finished_date'])) {
-            $movie->finished_date = $input['finished_date'];
-        }
-
-        if(!empty($input['author'])) {
-            $movie->author = $input['author'];
-        }
-        if(!empty($input['movie_created_year'])) {
-            $movie->movie_created_year = $input['movie_created_year'];
-        }
-        if(!empty($input['category_id'])) {
-            $movie->category_id = $input['category_id'];
-        }
-        if(!empty($input['user_id'])) {
-            $movie->user_id = $input['user_id'];
-        }
-        $movie->save();
 
 
         return $this->sendResponse($movie->toArray(), 'Movie is updated successfully.');
@@ -131,14 +127,22 @@ class MovieController extends BaseController
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param  int $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Movie $movie)
+    public function destroy($id)
     {
-        $movie->delete();
+        $movie = Movie::find($id);
 
-
+        if ($movie) {
+            if (Auth::id() == $movie->user_id) {
+                $movie->delete();
+            } else {
+                return $this->sendError('Unauthorized action.Your ID is ' . Auth::id() . ". Movie User_ID is " . $movie->user_id);
+            }
+        } else {
+            return $this->sendError("Movie with ID " . $id . " is not found.");
+        }
         return $this->sendResponse($movie->toArray(), 'Movie deleted successfully.');
     }
 

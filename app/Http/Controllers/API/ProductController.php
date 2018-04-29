@@ -28,7 +28,7 @@ class ProductController extends BaseController
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
@@ -42,7 +42,7 @@ class ProductController extends BaseController
         ]);
 
 
-        if($validator->fails()){
+        if ($validator->fails()) {
             return $this->sendError('Validation Error.', $validator->errors());
         }
 
@@ -57,7 +57,7 @@ class ProductController extends BaseController
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param  int $id
      * @return \Illuminate\Http\Response
      */
     public function show($id)
@@ -77,30 +77,37 @@ class ProductController extends BaseController
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
+     * @param  \Illuminate\Http\Request $request
+     * @param  int $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Product $product)
+    public function update(Request $request, $id)
     {
         $input = $request->all();
 
+        $product = Product::find($id);
+        if ($product) {
+//            $validator = Validator::make($input, [
+//                'name' => 'required',
+//                'detail' => 'required'
+//            ]);
+//
+//
+//            if ($validator->fails()) {
+//                return $this->sendError('Validation Error.', $validator->errors());
+//            }
 
-        $validator = Validator::make($input, [
-            'name' => 'required',
-            'detail' => 'required'
-        ]);
+            if (!empty($input['name'])) {
+                $product->name = $input['name'];
+            }
+            if (!empty($input['detail'])) {
+                $product->detail = $input['detail'];
+            }
 
-
-        if($validator->fails()){
-            return $this->sendError('Validation Error.', $validator->errors());
+            $product->save();
+        } else {
+            return $this->sendError("Product with ID " . $id . " is not found.");
         }
-
-
-        $product->name = $input['name'];
-        $product->detail = $input['detail'];
-        $product->save();
-
 
         return $this->sendResponse($product->toArray(), 'Product updated successfully.');
     }
@@ -109,13 +116,17 @@ class ProductController extends BaseController
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param  int $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Product $product)
+    public function destroy($id)
     {
-        $product->delete();
-
+        $product = Product::find($id);
+        if ($product) {
+            $product->delete();
+        } else {
+            return $this->sendError("Product with ID " . $id . " is not found.");
+        }
 
         return $this->sendResponse($product->toArray(), 'Product deleted successfully.');
     }
