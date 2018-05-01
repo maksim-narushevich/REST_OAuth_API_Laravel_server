@@ -19,7 +19,7 @@ class CreateMoviesTable extends Migration
             $table->string('title')->default('No title');
             $table->string('detail')->nullable()->default('none');
             $table->string('author')->nullable()->default('none');
-            $table->integer('category_id')->default('0');
+            $table->integer('category_id')->nullable()->default('0');
             $table->string('finished_date')->nullable();
             $table->string('movie_created_year')->nullable();
             $table->timestamps();
