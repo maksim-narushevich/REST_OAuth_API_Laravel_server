@@ -24,9 +24,24 @@ Route::middleware('auth:api')->group(function () {
     Route::group(['prefix' => 'v1', 'middleware' => 'auth'], function () {
         Route::get('users/{id}/books', 'API\UserController@showBooks');
         Route::get('users/{id}/movies', 'API\UserController@showMovies');
+        Route::get('products/list/{intOffset?}/{intLimit?}', [
+            'uses' => 'API\ProductController@index'
+        ]);
         Route::resource('products', 'API\ProductController');
+
+        Route::get('books/list/{intOffset?}/{intLimit?}', [
+            'uses' => 'API\BookController@index'
+        ]);
         Route::resource('books', 'API\BookController');
+
+        Route::get('movies/list/{intOffset?}/{intLimit?}', [
+            'uses' => 'API\MovieController@index'
+        ]);
         Route::resource('movies', 'API\MovieController');
+
+        Route::get('users/list/{intOffset?}/{intLimit?}', [
+            'uses' => 'API\UserController@index'
+        ]);
         Route::resource('users', 'API\UserController');
 
     });

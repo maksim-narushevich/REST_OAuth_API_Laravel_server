@@ -14,12 +14,30 @@ class ProductController extends BaseController
     /**
      * Display a listing of the resource.
      *
+     * @param $intOffset
+     * @param $intLimit
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index($intOffset=0,$intLimit=0)
     {
-        $products = Product::all();
+        if($intOffset>=0 && is_numeric($intOffset)) {
+            if ($intLimit > 0 && is_numeric($intLimit)) {
+                $products = Product::where('id', '>', '0')
+                    ->offset($intOffset)
+                    ->limit($intLimit)
+                    ->get();
+            } elseif ($intLimit == 0 && is_numeric($intLimit)) {
+                $products = Product::skip($intOffset)->take(PHP_INT_MAX)->get();
+            } else {
+                return $this->sendError('Wrong limit value. Limit value should be numeric and can\'t be less than 0');
+            }
+        }else{
+            return $this->sendError('Wrong offset value. Offset value should be numeric and can\'t be less than 0');
+        }
 
+        if(count($products->toArray())<=0){
+            return $this->sendError('Products were not found');
+        }
 
         return $this->sendResponse($products->toArray(), 'Products retrieved successfully.');
     }
