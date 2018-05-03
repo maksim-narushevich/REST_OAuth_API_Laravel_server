@@ -22,8 +22,8 @@ Route::post('register', 'API\RegisterController@register');
 
 Route::middleware('auth:api')->group(function () {
     Route::group(['prefix' => 'v1', 'middleware' => 'auth'], function () {
-        Route::get('users/{id}/books', 'API\UserController@showBooks');
-        Route::get('users/{id}/movies', 'API\UserController@showMovies');
+        Route::get('users/{id}/books/{intOffset?}/{intLimit?}', 'API\UserController@showBooks');
+        Route::get('users/{id}/movies/{intOffset?}/{intLimit?}', 'API\UserController@showMovies');
         Route::get('products/list/{intOffset?}/{intLimit?}', [
             'uses' => 'API\ProductController@index'
         ]);

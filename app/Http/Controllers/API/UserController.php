@@ -142,21 +142,37 @@ class UserController extends BaseController
      * Remove the specified resource from storage.
      *
      * @param  int $id
+     * @param $intOffset
+     * @param $intLimit
      * @return \Illuminate\Http\Response
      */
-    public function showBooks($id)
+    public function showBooks($id,$intOffset=0,$intLimit=0)
     {
+        //-- Get user by ID
         $user = User::find($id);
 
         if ($user != null) {
-            $books = $user->books;
-            if ($books === null || empty($books->toArray())) {
-                return $this->sendError('No books were found.');
+            if($intOffset>=0 && is_numeric($intOffset)) {
+                if ($intLimit > 0 && is_numeric($intLimit)) {
+                    $books = Book::where('user_id', $id)
+                        ->offset($intOffset)
+                        ->limit($intLimit)
+                        ->get();
+                } elseif ($intLimit == 0 && is_numeric($intLimit)) {
+                    $books = Book::where('user_id', $id)->skip($intOffset)->take(PHP_INT_MAX)->get();
+                } else {
+                    return $this->sendError('Wrong limit value. Limit value should be numeric and can\'t be less than 0');
+                }
+            }else{
+                return $this->sendError('Wrong offset value. Offset value should be numeric and can\'t be less than 0');
+            }
+
+            if(count($books->toArray())<=0){
+                return $this->sendError('Books were not found');
             }
         } else {
             return $this->sendError('No user with ID ' . $id . ' was found.');
         }
-
 
         return $this->sendResponse($books->toArray(), 'User\'s books retrieved successfully.');
     }
@@ -167,16 +183,32 @@ class UserController extends BaseController
      * Remove the specified resource from storage.
      *
      * @param  int $id
+     * @param $intOffset
+     * @param $intLimit
      * @return \Illuminate\Http\Response
      */
-    public function showMovies($id)
+    public function showMovies($id,$intOffset=0,$intLimit=0)
     {
         $user = User::find($id);
 
         if ($user != null) {
-            $movies = $user->movies;
-            if ($movies === null || empty($movies->toArray())) {
-                return $this->sendError('No movies were found.');
+            if($intOffset>=0 && is_numeric($intOffset)) {
+                if ($intLimit > 0 && is_numeric($intLimit)) {
+                    $movies = Movie::where('user_id', $id)
+                        ->offset($intOffset)
+                        ->limit($intLimit)
+                        ->get();
+                } elseif ($intLimit == 0 && is_numeric($intLimit)) {
+                    $movies = Movie::where('user_id', $id)->skip($intOffset)->take(PHP_INT_MAX)->get();
+                } else {
+                    return $this->sendError('Wrong limit value. Limit value should be numeric and can\'t be less than 0');
+                }
+            }else{
+                return $this->sendError('Wrong offset value. Offset value should be numeric and can\'t be less than 0');
+            }
+
+            if(count($movies->toArray())<=0){
+                return $this->sendError('Movies were not found');
             }
         } else {
             return $this->sendError('No user with ID ' . $id . ' was found.');
