@@ -1,0 +1,45 @@
+version: '3.7'
+
+services:
+    nginx_server:
+        image: nginx:latest
+        networks:
+            - restapi_default
+        ports:
+            - "8308:80"
+            - "4408:443"
+        volumes:
+            - ./docker/nginx/hosts:/etc/nginx/conf.d
+            - ./:/var/www
+            - ./logs/nginx/:/var/log/nginx:cached
+        depends_on:
+            - php_server
+    php_server:
+        build:
+            context: ./
+            dockerfile: ./docker/php/Dockerfile
+        container_name: restapi_server
+        user: "${UID}"
+        networks:
+            - restapi_default
+        volumes:
+          - ./:/var/www
+          - ./data/composer:/.composer
+          - ./logs/laravel:/var/www/var/logs:cached
+        depends_on:
+            - mysql
+    mysql:
+        image: mysql:5.7.21
+        environment:
+            MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+            MYSQL_DATABASE: ${DB_DATABASE}
+        ports:
+            - "8908:3306"
+        volumes:
+            - ./data/mysql:/var/lib/mysql
+        networks:
+            - restapi_default
+
+networks:
+    restapi_default:
+        external: true
